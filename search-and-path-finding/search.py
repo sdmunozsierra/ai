@@ -135,103 +135,6 @@ class SearchAlgorithms():
         except IndexError:
             return False
 
-    def bfs(self):
-        """Run BFS. First checks all neighboors"""
-        print("Starting BFS search")
-        self.queue = deque([self.map.starting_loc])
-        max_nodes = len(self.queue)
-        print("queue:", self.queue)
-        while self.queue:
-
-            # Check for current nodes in memory
-            if max_nodes < len(self.queue):
-                max_nodes = len(self.queue)
-            x, y = self.queue.popleft()
-            self.cost = self.cost + self.get_path_cost(x, y)  # Update cost
-            self.visited.append((x, y))  # Mark as visited
-            print("Visited locations:", self.visited)
-
-            # Check for a goal
-            if self.is_goal(x, y):
-                # self.cost = self.cost + self.get_path_cost(x, y)
-                print("Finished with cost:", self.cost)
-                self.finished = True
-                self.max_nodes = max
-                return self.visited
-
-            # Expand Neighboors
-            neighboors = self.expand_neighboors(x, y)
-            if neighboors:
-                for n in neighboors:
-                    self.queue.append(n)
-        # Did not found a solution
-        print("There is not solution")
-        return None
-
-    def dfs(self):
-        """Run DFS. First checks all neighboors"""
-        print("Starting bfs")
-        self.queue = deque([self.map.starting_loc])
-        max_nodes = len(self.queue)
-        print("queue:", self.queue)
-        while self.queue:
-
-            # Check for current nodes in memory
-            if max_nodes < len(self.queue):
-                max_nodes = len(self.queue)
-            x, y = self.queue.popleft()
-            self.visited.append((x, y))
-            self.cost = self.cost + self.get_path_cost(x, y)
-            print("visited:", self.visited)
-
-            # Check for a goal
-            if self.is_goal(x, y):
-                print("Finished with cost:", self.cost)
-                self.finished = True
-                self.max_nodes = max
-                return self.visited
-
-            # Expand Neighboors
-            neighboors = self.expand_neighboors(x, y)
-            if neighboors:
-                # Append only first neighboor
-                self.queue.append(neighboors[0])
-                self.cost = self.cost + self.get_path_cost(x, y)
-
-        # Did not found a solution
-        print("There is not solution")
-        return None
-
-    def a_star(self):
-        """Run A* Search. Uses a heuristic function."""
-        print("Running A* Search\n")
-        self.queue = deque([self.map.starting_loc])
-        max_nodes = len(self.queue)
-        print("queue:", self.queue)
-        while self.queue:
-
-            # Check for current nodes in memory
-            if max_nodes < len(self.queue):
-                max_nodes = len(self.queue)
-            x, y = self.queue.popleft()
-            self.visited.append((x, y))
-            self.cost = self.cost + self.get_path_cost(x, y)
-            print("visited:", self.visited)
-
-            # Check for a goal
-            if self.is_goal(x, y):
-                # self.cost = self.cost + self.get_path_cost(x, y)
-                print("Finished with cost:", self.cost)
-                self.finished = True
-                self.max_nodes = max
-                return self.visited
-            neighboors = self.expand_neighboors(x, y)
-            if neighboors:
-                self.queue.append(self.heuristic_function(neighboors))
-        # Did not found a solution
-        print("There is not solution")
-        return None
-
     def algorithm_logic(self, search_alg):
         """Chooses a logic for a specified algorithm.
             :param search_alg: 'bfs', 'dfs', or 'a_star'"""
@@ -254,7 +157,7 @@ class SearchAlgorithms():
                 # self.cost = self.cost + self.get_path_cost(x, y)
                 print("Finished with cost:", self.cost)
                 self.finished = True
-                self.max_nodes = max
+                self.max_nodes = max_nodes
                 self.time = time.time() - self.time
                 return self.visited
 
@@ -315,14 +218,21 @@ class SearchAlgorithms():
 
     def print_results(self):
         if self.finished:
-            path_cost = "Path cost found is:", self.cost
-            number = "The number of nodes expanded:", len(self.visited)
-            maximum = "Maximum number of nodes in memory:", self.max_nodes
-            runtime = "Runtime of the algorithm in ms:", 0
-            path = "The path sequence as (row, col):", self.visited
-            print(path_cost, number, maximum, runtime, path)
+            path_cost = "Path cost found is: {}".format(self.cost)
+            number = "The number of nodes expanded: {}".format(
+                len(self.visited))
+            maximum = "Maximum number of nodes in memory: {}".format(
+                self.max_nodes)
+            runtime = "Runtime of the algorithm in seconds: {}".format(
+                self.time)
+            path = "The path sequence as (row, col): {}".format(self.visited)
+            result = "{}\n{}\n{}\n{}\n{}\n".format(
+                path_cost, number, maximum, runtime, path)
+            print('-'*60)
+            print(result)
+            print('-'*60)
         else:
-            print("The algorith did no finished in 3 mins.")
+            print("The algorith did no finished.")
 
 
 if __name__ == "__main__":
