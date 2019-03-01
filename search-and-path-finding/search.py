@@ -147,7 +147,7 @@ class SearchAlgorithms():
                 max_nodes = len(self.queue)
 
             # Get next node from queue
-            x, y = self.queue.popleft()
+            x, y = self.queue.pop()
             if (x, y) in self.visited:
                 continue
             self.visited.append((x, y))  # Mark node as visited
@@ -156,7 +156,6 @@ class SearchAlgorithms():
 
             # Check for a goal
             if self.is_goal(x, y):
-                # self.cost = self.cost + self.get_path_cost(x, y)
                 print("Finished with cost:", self.cost)
                 self.finished = True
                 self.max_nodes = max_nodes
