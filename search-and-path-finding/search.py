@@ -105,7 +105,7 @@ class SearchAlgorithms():
         """Return valid neighbors to visit (if they haven't been visited).
             :param x: Row axis
             :param y: Column axis"""
-        possible_neighboors = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+        possible_neighboors = [(x-1, y), (x, y-1), (x+1, y), (x, y+1)]
         print("Generating all neighboors of({},{}): {}".format(
             x, y, possible_neighboors))
         valid_neighboors = []
@@ -135,10 +135,52 @@ class SearchAlgorithms():
         except IndexError:
             return False
 
+    def bfs(self):
+        """BFS."""
+        self.queue = deque([self.map.starting_loc])
+        max_nodes = len(self.queue)
+        print("queue:", self.queue)
+        while self.queue:
+
+            # Check for current nodes in memory
+            if max_nodes < len(self.queue):
+                max_nodes = len(self.queue)
+
+            # Get next node from queue
+            x, y = self.queue.popleft()
+            if (x, y) in self.visited:
+                continue
+            self.visited.append((x, y))  # Mark node as visited
+            self.cost = self.cost + self.get_path_cost(x, y)
+            print("visited:", self.visited)
+
+            # Check for a goal
+            if self.is_goal(x, y):
+                # self.cost = self.cost + self.get_path_cost(x, y)
+                print("Finished with cost:", self.cost)
+                self.finished = True
+                self.max_nodes = max_nodes
+                self.time = time.time() - self.time
+                return self.visited
+
+            # Expand Neighboors from root and add all
+            neighboors = self.expand_neighboors(x, y)
+            if neighboors:
+                for n in neighboors:
+                    self.queue.append(n)
+
+        # Did not found a solution
+        print("There is not solution")
+        self.time = time.time() - self.time
+        return None
+
     def algorithm_logic(self, search_alg):
         """Chooses a logic for a specified algorithm.
             :param search_alg: 'bfs', 'dfs', or 'a_star'"""
         print("Running {}\n".format(search_alg))
+        if search_alg == 'bfs':
+            self.bfs()
+            return
         self.queue = deque([self.map.starting_loc])
         max_nodes = len(self.queue)
         print("queue:", self.queue)
