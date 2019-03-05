@@ -1,5 +1,6 @@
 """Read a map file.txt and perform Path Finding."""
 from collections import deque
+from bisect import insort
 import sys
 import time
 
@@ -81,9 +82,11 @@ class SearchAlgorithms():
             :param map: ReadMap object"""
         self.map = map
         self.grid = map.map
-        self.visited = []  # Visited nodes
-        self.queue = None  # Nodes to visit for BFS
-        self.stack = None  # Stack t
+        self.parent = {}  # Parent nodes
+        self.visited = []  # Visited (opened) nodes
+        self.path = []  # Solution path (if any)
+        self.queue = None  # Queue for BFS
+        self.stack = None  # Stack for DFS
         self.cost = 0
         self.max_nodes = 0
         self.finished = False
@@ -126,7 +129,9 @@ class SearchAlgorithms():
         return None
 
     def is_goal(self, x, y):
-        """Check if the current path is the goal."""
+        """Check if the current path is the goal.
+            :param x: Row axis
+            :param y: Column axis"""
         try:
             goal = (x, y) == self.map.goal_loc
             print("Checking for goal {}: current {} vs expected {}".format(
@@ -135,43 +140,122 @@ class SearchAlgorithms():
         except IndexError:
             return False
 
+    def print_path(self, parent):
+        """Prints the path solution by keeping track of the parent. Used by BFS
+            :param parent: Parent dictionary containing the solution"""
+        goal = self.map.goal_loc
+        self.path = [goal]
+        # trace the path back till we reach start
+        while goal != self.map.starting_loc:
+            self.cost = self.cost + self.get_path_cost(goal[0], goal[1])
+            goal = parent[goal]
+            self.path.insert(0, goal)
+        return self.path
+
+    def calculate_path_cost(self, path):
+        """Calculates the path cost. Used by DFS.
+            :param path: Valid path to solution"""
+        for vertex in path:
+            self.cost = self.cost + self.get_path_cost(vertex[0], vertex[1])
+        return self.cost
+
     def bfs(self):
-        """BFS."""
-        self.queue = deque([self.map.starting_loc])
-        max_nodes = len(self.queue)
-        print("queue:", self.queue)
+        """BFS with parent tracking."""
+        start = self.map.starting_loc
+
+        # Start Queue
+        self.queue = deque([start])
+        self.parent[start] = start
+        opened = len(self.queue)
+
+        # Iterate every node until solution
         while self.queue:
+            # Update opened nodes
+            opened = len(self.queue) if opened < len(self.queue) else opened
+            curr_node = self.queue.popleft()  # Open left node
+            # Expand neighbors
+            neighbors = self.expand_neighboors(curr_node[0], curr_node[1])
+            for neighbor in neighbors:
+                # goal found
+                if self.is_goal(neighbor[0], neighbor[1]):
+                    # Mark as finished, update time and nodes
+                    self.finished = True
+                    self.time = time.time() - self.time
+                    self.max_nodes = opened
+                    self.parent[neighbor] = curr_node
+                    self.print_path(self.parent)
+                    return True
+                # check if neighbor already seen
+                if neighbor not in self.parent:
+                    self.parent[neighbor] = curr_node
+                    self.queue.append(neighbor)
+        # No solution found
+        print("No path found.")
+        return False
 
-            # Check for current nodes in memory
-            if max_nodes < len(self.queue):
-                max_nodes = len(self.queue)
+    def dfs(self):
+        """Implement dfs."""
+        start = self.map.starting_loc
+        self.stack = [(start, [start])]
+        self.visited = set()
+        opened = len(self.stack)
 
-            # Get next node from queue
-            x, y = self.queue.pop()
-            if (x, y) in self.visited:
-                continue
-            self.visited.append((x, y))  # Mark node as visited
-            self.cost = self.cost + self.get_path_cost(x, y)
-            print("visited:", self.visited)
+        while self.stack:
+            opened = len(self.stack) if opened < len(self.stack) else opened
+            (vertex, path) = self.stack.pop()
+            if vertex not in self.visited:
+                if self.is_goal(vertex[0], vertex[1]):
+                    # Mark as finished, update time and nodes
+                    self.finished = True
+                    self.time = time.time() - self.time
+                    self.max_nodes = opened - 1
+                    self.path = path
+                    self.parent = self.visited  # To measure expanded nodes
+                    self.calculate_path_cost(path)
+                    return True
+                self.visited.add(vertex)
+                neighboors = self.expand_neighboors(vertex[0], vertex[1])
+                if neighboors:
+                    for neighbor in neighboors:
+                        self.stack.append((neighbor, path + [neighbor]))
+        # No solution found
+        print("No path found.")
+        return False
 
-            # Check for a goal
-            if self.is_goal(x, y):
-                print("Finished with cost:", self.cost)
-                self.finished = True
-                self.max_nodes = max_nodes
-                self.time = time.time() - self.time
-                return self.visited
+    def astar(self):
+        """A* BFS with heuristic function."""
+        start = self.map.starting_loc
 
-            # Expand Neighboors from root and add all
-            neighboors = self.expand_neighboors(x, y)
-            if neighboors:
-                for n in neighboors:
-                    self.queue.append(n)
+        # Start Queue
+        self.queue = deque([start])
+        self.parent[start] = start
+        opened = len(self.queue)
 
-        # Did not found a solution
-        print("There is not solution")
+        # Iterate every node until solution
+        while self.queue:
+            # Update opened nodes
+            opened = len(self.queue) if opened < len(self.queue) else opened
+            curr_node = self.queue.popleft()  # Open left node
+            # Expand neighbors
+            neighbors = self.expand_neighboors(curr_node[0], curr_node[1])
+            neighbors = (self.heuristic_function_as_list(neighbors))
+            print(neighbors)
+            for neighbor in neighbors:
+                # goal found
+                if self.is_goal(neighbor[0], neighbor[1]):
+                    # Mark as finished, update time and nodes
+                    self.finished = True
+                    self.parent[neighbor] = curr_node
+                    self.print_path(self.parent)
+                    return True
+                # check if neighbor already seen
+                if neighbor not in self.parent:
+                    self.parent[neighbor] = curr_node
+                    self.queue.append(neighbor)
+        # No solution found
+        print("No path found.")
         self.time = time.time() - self.time
-        return None
+        return False
 
     def algorithm_logic(self, search_alg):
         """Chooses a logic for a specified algorithm.
@@ -180,98 +264,80 @@ class SearchAlgorithms():
         if search_alg == 'bfs':
             self.bfs()
             return
-        self.queue = deque([self.map.starting_loc])
-        max_nodes = len(self.queue)
-        print("queue:", self.queue)
-        while self.queue:
+        if search_alg == 'dfs':
+            self.dfs()
+            return
+        if search_alg == 'astar':
+            self.astar()
+            return
 
-            # Check for current nodes in memory
-            if max_nodes < len(self.queue):
-                max_nodes = len(self.queue)
-            x, y = self.queue.popleft()
-            self.visited.append((x, y))
-            self.cost = self.cost + self.get_path_cost(x, y)
-            print("visited:", self.visited)
-
-            # Check for a goal
-            if self.is_goal(x, y):
-                # self.cost = self.cost + self.get_path_cost(x, y)
-                print("Finished with cost:", self.cost)
-                self.finished = True
-                self.max_nodes = max_nodes
-                self.time = time.time() - self.time
-                return self.visited
-
-            # Expand neighboors according to search_alg
-            if search_alg == 'bfs':
-                # Expand Neighboors from root and add all
-                neighboors = self.expand_neighboors(x, y)
-                if neighboors:
-                    for n in neighboors:
-                        self.queue.append(n)
-            if search_alg == 'dfs':
-                # Expand neighboors from root and add only the first one
-                neighboors = self.expand_neighboors(x, y)
-                if neighboors:
-                    # Append only first neighboor
-                    self.queue.append(neighboors[0])
-                    self.cost = self.cost + self.get_path_cost(x, y)
-
-            if search_alg == 'astar':
-                # Expand neighboors but use heuristic function
-                neighboors = self.expand_neighboors(x, y)
-                if neighboors:
-                    self.queue.append(self.heuristic_function(neighboors))
-
-        # Did not found a solution
-        print("There is not solution")
-        self.time = time.time() - self.time
-        return None
-
-    def heuristic_function(self, neighboors):
-        """Finds the heuristic (lowest cost) neighboor.
-            :neighboors: List of neighboors
-            :return: Lowest cost neighboor
+    def heuristic_function(self, neighbors):
+        """Returns a list of neighbors from lowest to highest.
+            :param neighbors: List of neighbors
+            :return: Lowest cost neighbor list
         """
-        print("Heuristic information for {} neighboors".format(neighboors))
+        print("Heuristic information for {} neighbors".format(neighbors))
         lowest_cost = None
-        lowest_cost_neighboor = None
-        if isinstance(neighboors, tuple):
-            print("Returning only one neighboor {}".format(neighboors))
-            return neighboors
-        for n in neighboors:
+        lowest_cost_neighbor = None
+        if isinstance(neighbors, tuple):
+            print("Returning only one neighboor {}".format(neighbors))
+            return neighbors
+        for n in neighbors:
             current_cost = self.get_path_cost(n[0], n[1])
             print("Comparing cost:{} node:{} with cost:{} node:{}".format(
-                lowest_cost, lowest_cost_neighboor, current_cost, n))
+                lowest_cost, lowest_cost_neighbor, current_cost, n))
             try:
-                # Saves the current cost as the lowest cost
                 if lowest_cost > current_cost:
                     lowest_cost = current_cost
-                    lowest_cost_neighboor = n
+                    lowest_cost_neighbor = n
                 continue
             except TypeError:
                 lowest_cost = current_cost
-                lowest_cost_neighboor = n
-        # Returns lowest cost neighboor
+                lowest_cost_neighbor = n
+        # Returns lowest cost neighbor
         print("Heuristic determined cost{}: node{}:".format(
-            lowest_cost, lowest_cost_neighboor))
-        return lowest_cost_neighboor
+            lowest_cost, lowest_cost_neighbor))
+        return lowest_cost_neighbor
+
+    def heuristic_function_as_list(self, neighbors):
+        """Returns a list of neighbors ranked from lowest to highest.
+            :param neighbors: Possible neighbors to be ranked."""
+        print("Heuristic function list for {} neighbors".format(neighbors))
+        ordered_list_by_cost = []
+        ordered_list_by_node = []
+        if isinstance(neighbors, tuple):
+            print("Returning only one neighboor {}".format(neighbors))
+            return neighbors
+        for n in neighbors:
+            current_cost = self.get_path_cost(n[0], n[1])
+            try:
+                # Saves the current cost as the lowest cost
+                insort(ordered_list_by_cost, current_cost)
+                idx = ordered_list_by_cost.index(current_cost)
+                ordered_list_by_node.insert(idx, n)
+            except TypeError:
+                print("Error, break")
+        print("list of costs:", ordered_list_by_cost)
+        print("list of nodes:", ordered_list_by_node)
+        return ordered_list_by_node
 
     def print_results(self):
+        """Prints the result of the algorithm."""
         if self.finished:
             path_cost = "Path cost found is: {}".format(self.cost)
             number = "The number of nodes expanded: {}".format(
-                len(self.visited))
+                len(self.parent))
             maximum = "Maximum number of nodes in memory: {}".format(
                 self.max_nodes)
             runtime = "Runtime of the algorithm in seconds: {}".format(
                 self.time)
-            path = "The path sequence as (row, col): {}".format(self.visited)
-            result = "{}\n{}\n{}\n{}\n{}\n".format(
+            path = "The path sequence as (row, col): {}".format(self.path)
+            result = "{}\n{}\n{}\n{}\n{}".format(
                 path_cost, number, maximum, runtime, path)
-            print('-'*60)
+            header = "-"*30 + "RESULTS" + "-"*30
+            print(header)
             print(result)
-            print('-'*60)
+            print('-'*68)
         else:
             print("The algorith did no finished.")
 
