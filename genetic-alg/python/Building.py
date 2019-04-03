@@ -199,8 +199,78 @@ class SearchAlgorithm:
                             scheduled = True
                             break
         print("solution:\n")
-        print(solution.schedule)
+        for row in solution.schedule:
+            for val in row:
+                print(val, end=' ')
+            print()
         return solution
+
+    @staticmethod
+    def anealing(problem, deadline):
+        solution = problem.getEmptySchedule()
+        print("Courses {} values inorder:".format(len(problem.courses)))
+        for course in problem.courses:
+            print("{},".format(course.value), end='')
+
+        def generate_idx(problem):
+            size = len(problem.courses)
+            i = problem.random.nextInt(size)  # Uses same random seed
+            u = 1   # Noise
+            if i+u > size:
+                return i-1
+            if i-u < 0:
+                return i+1
+            return i
+
+        x = problem.courses[0]  # Start at the beggining
+        history = []  # History to keep track of visited
+
+        while len(history) is not len(problem.courses):
+            if x in history:
+                # print("x in history")
+                pass
+            else:
+                history.append(x)
+            i = generate_idx(problem)
+            j = generate_idx(problem)
+            try:
+                right = problem.courses[i]
+                left = problem.courses[j]
+            except IndexError:
+                continue
+            if left.value > right.value:
+                x = left
+            else:
+                x = right
+
+        print("history ({}) elements:".format(len(history)))
+        for course in history:
+            print("{},".format(course.value), end='')
+
+        # Find a schedule
+        for i in range(len(history)):
+            c = history[i]
+            scheduled = False
+
+            for j in range(len(c.timeSlotValues)):
+                if (scheduled):
+                    break
+                if (c.timeSlotValues[j] > 0):
+                    for k in range(len(problem.rooms)):
+                        if (solution.schedule[k][j] < 0):
+                            solution.schedule[k][j] = i
+                            scheduled = True
+                            break
+        print("solution:\n")
+        for row in solution.schedule:
+            for val in row:
+                print(val, end=' ')
+            print()
+        # print(solution.schedule)
+        return solution
+
+
+
 
 def main():
     nBuildings = 0
@@ -246,6 +316,10 @@ def main():
     solution = None
     if (algorithm == 0):
         solution = search.naiveBaseline(test1, deadline)
+    elif (algorithm == 1):
+        solution = search.anealing(test1, deadline)
+        print("DONE!")
+
     else:
         print("ERROR: Given algorithm number does not exist!")
         exit(1)

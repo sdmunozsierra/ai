@@ -40,7 +40,7 @@ public class SearchAlgorithm {
     System.out.println("Solution");
     for (int w = 0; w < solution.schedule.length; w++){
     for (int x = 0; x < solution.schedule[w].length; x++){
-      System.out.print(solution.schedule[w][x]);
+      System.out.print(solution.schedule[w][x] + " ");
     }
       System.out.println();
   }
