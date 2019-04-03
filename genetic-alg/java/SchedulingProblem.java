@@ -32,12 +32,15 @@ public class SchedulingProblem {
       Building tmp = new Building();
       tmp.xCoord = random.nextDouble() * MAX_X_COORD;
       tmp.yCoord = random.nextDouble() * MAX_Y_COORD;
+      System.out.println("x: " + tmp.xCoord + " y: " + tmp.yCoord);
       buildings.add(tmp);
     }
 
     // create random rooms
     for (int i = 0; i < nRooms; i++) {
       Room tmp = new Room();
+      int bld = (int) (random.nextDouble() * nBuildings);
+      System.out.println("bld " + bld);
       tmp.b = buildings.get((int) (random.nextDouble() * nBuildings));
       tmp.capacity = ((int)(random.nextDouble() * 70)) + 30;
       rooms.add(tmp);
@@ -62,12 +65,17 @@ public class SchedulingProblem {
 
     //EXTRA
     for (int i = 0; i < courses.size(); i++) {
-      System.out.println(courses.get(i).timeSlotValues[i]);
+        for (int j = 0; j < courses.get(i).timeSlotValues.length; j++) {
+        System.out.print(courses.get(i).timeSlotValues[j]);
+      }
+        System.out.println();
     }
   }
 
   public Schedule getEmptySchedule() {
     Schedule tmp = new Schedule(rooms.size(), NUM_TIME_SLOTS);
+
+    System.out.println("Schedule size: " + rooms.size() + " , " + NUM_TIME_SLOTS);
 
     for (int i = 0; i < rooms.size(); i++) {
       for (int j = 0; j < NUM_TIME_SLOTS; j++) {

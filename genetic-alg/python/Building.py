@@ -64,6 +64,8 @@ class SchedulingProblem:
         # create random rooms
         for room in range(nRooms):
             tmp = Room()
+            bld = int(self.random.nextDouble() * nBuildings)
+            print("bld: {}".format(bld))
             tmp.b = self.buildings[int(self.random.nextDouble() * nBuildings)]
             tmp.capacity = (int(self.random.nextDouble() * 70)) + 30
             self.rooms.append(tmp)
@@ -93,6 +95,7 @@ class SchedulingProblem:
 
     def getEmptySchedule(self):
         tmp = Schedule()
+        print("Schedule size: {}, {}".format(len(self.rooms), self.NUM_TIME_SLOTS))
         tmp.Schedule(len(self.rooms), self.NUM_TIME_SLOTS)
 
         for idx in range(len(self.rooms)):
@@ -189,12 +192,12 @@ class SearchAlgorithm:
             for j in range(len(c.timeSlotValues)):
                 if (scheduled):
                     break
-            if (c.timeSlotValues[j] > 0):
-                for k in range(len(problem.rooms)):
-                    if (solution.schedule[k][j] < 0):
-                        solution.schedule[k][j] = i
-                        scheduled = True
-                        break
+                if (c.timeSlotValues[j] > 0):
+                    for k in range(len(problem.rooms)):
+                        if (solution.schedule[k][j] < 0):
+                            solution.schedule[k][j] = i
+                            scheduled = True
+                            break
         print("solution:\n")
         print(solution.schedule)
         return solution
@@ -214,7 +217,7 @@ def main():
     nCourses = 10
     TIME_LIMIT_SECONDS = 60
     algorithm = 0
-    seed = 1
+    seed = 2
     #   } catch (NumberFormatException e) {
     #     System.out.println("Number format exception reading arguments");
     #     System.exit(1);
