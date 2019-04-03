@@ -1,4 +1,4 @@
-# import random
+import sys
 import math
 import time
 import javarandom2 as random
@@ -210,22 +210,19 @@ def main():
     algorithm = 0
     seed = 0
 
-    # if (args.length == 6) {
-    #   try {
-    nBuildings = 10
-    nRooms = 10
-    nCourses = 10
-    TIME_LIMIT_SECONDS = 60
-    algorithm = 0
-    seed = 2
-    #   } catch (NumberFormatException e) {
-    #     System.out.println("Number format exception reading arguments");
-    #     System.exit(1);
-    #   }
-    # } else {
-    #   System.out.println("ERROR: Incorrect number of arguments (should have six).");
-    #   System.exit(1);
-    # }
+    try:
+        nBuildings = int(sys.argv[1])
+        nRooms = int(sys.argv[2])
+        nCourses = int(sys.argv[3])
+        TIME_LIMIT_SECONDS = int(sys.argv[4])
+        algorithm = int(sys.argv[5])
+        seed = int(sys.argv[6])
+    except IndexError:
+        print("ERROR: Incorrect number of arguments (should have six).")
+        exit(1)
+    except ValueError:
+        print("Number format exception reading arguments")
+        exit(1)
 
     print("Number of Buildings: " + str(nBuildings))
     print("Number of Rooms: " + str(nRooms))
