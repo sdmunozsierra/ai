@@ -206,7 +206,7 @@ class SearchAlgorithm:
         return solution
 
     @staticmethod
-    def anealing(problem, deadline):
+    def greedy(problem, deadline):
         solution = problem.getEmptySchedule()
         print("Courses {} values inorder:".format(len(problem.courses)))
         for course in problem.courses:
@@ -269,6 +269,62 @@ class SearchAlgorithm:
         # print(solution.schedule)
         return solution
 
+    @staticmethod
+    def sa(problem, deadline):
+        def distance(problem, index):
+            """Calculates distance between two coordinates."""
+            # calculate the distance penalty
+            r = problem.rooms[index]
+            c = problem.courses[index]
+            b1 = r.b
+            b2 = c.preferredLocation
+            xDist = (b1.xCoord - b2.xCoord) * (b1.xCoord - b2.xCoord)
+            yDist = (b1.yCoord - b2.yCoord) * (b1.yCoord - b2.yCoord)
+            dist = math.sqrt(xDist + yDist)
+            return dist
+
+        def energy(state1, state2):
+            """State are indexes."""
+            e = 0
+            e += distance(problem, state1) + distance(problem, state2)
+            return e
+
+        solution = problem.getEmptySchedule()
+
+        # print("Courses {} values inorder:".format(len(problem.courses)))
+        # for course in problem.courses:
+            # print("{},".format(course.value), end='')
+
+        def generate_idx(problem):
+            size = len(problem.courses)
+            i = problem.random.nextInt(size)  # Uses same random seed
+            u = 1   # Noise
+            if i+u > size:
+                return i-1
+            if i-u < 0:
+                return i+1
+            return i
+
+        temp = 4
+        scale = math.sqrt(temp)
+        search_space = (len(problem.courses))
+        start = problem.random.nextInt(search_space)
+        index = start
+        # x = problem.rooms[start]  # index
+        cur = distance(problem, index)
+        history = [problem.rooms[index]]  # History to keep track of visited
+        for i in range(100):
+            prop = index + int(problem.random.nextDouble() * scale)
+            formula = math.log(problem.random.nextDouble())*temp
+            next_dist = distance(problem, (int(prop))) - cur
+            if prop > len(problem.rooms) or prop < 0 or formula > next_dist:
+                prop = index
+            index = prop
+            cur = distance(problem, index)
+            temp = 0.9 * temp
+            history.append(problem.rooms[index])
+
+        print(history)
 
 
 
@@ -317,7 +373,9 @@ def main():
     if (algorithm == 0):
         solution = search.naiveBaseline(test1, deadline)
     elif (algorithm == 1):
-        solution = search.anealing(test1, deadline)
+        solution = search.greedy(test1, deadline)
+    elif (algorithm == 2):
+        solution = search.sa(test1, deadline)
         print("DONE!")
 
     else:
