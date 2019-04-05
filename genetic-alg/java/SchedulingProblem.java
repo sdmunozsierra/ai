@@ -79,6 +79,7 @@ public class SchedulingProblem {
 
     for (int i = 0; i < rooms.size(); i++) {
       for (int j = 0; j < NUM_TIME_SLOTS; j++) {
+        System.out.println("i " + i + " j " + j);
         tmp.schedule[i][j] = -1;
       }
     }

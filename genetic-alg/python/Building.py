@@ -26,12 +26,12 @@ class Schedule:
         self.schedule = None
 
     def Schedule(self, nRooms, nTimeSlots):
-        self.schedule = [[0 for x in range(nRooms)] for y in range(nTimeSlots)]
+        self.schedule = [[0 for x in range(nTimeSlots)] for y in range(nRooms)]
 
 class SchedulingProblem:
 
     def __init__(self):
-        self.NUM_TIME_SLOTS = 100
+        self.NUM_TIME_SLOTS = 10
         self.MAX_X_COORD = 10
         self.MAX_Y_COORD = 10
         self.DISTANCE_PENALTY = float(2.5)
@@ -100,9 +100,13 @@ class SchedulingProblem:
         print("Schedule size: {}, {}".format(len(self.rooms), self.NUM_TIME_SLOTS))
         tmp.Schedule(len(self.rooms), self.NUM_TIME_SLOTS)
 
-        for idx in range(len(self.rooms)):
-            for timeSlot in range(self.NUM_TIME_SLOTS):
-                tmp.schedule[idx][timeSlot] = -1
+        print("LEN ROOMS::")
+        print(len(self.rooms))
+        print(len(tmp.schedule))
+        for i in range(len(self.rooms)):
+            for j in range(self.NUM_TIME_SLOTS):
+                print("i {} j {}".format(i, j))
+                tmp.schedule[i][j] = -1
         return tmp
 
     def evaluateSchedule(self, solutionSchedule):
@@ -131,8 +135,8 @@ class SchedulingProblem:
                     return float('-inf')
 
                 assigned[s[i][j]] = assigned[s[i][j]] + 1
-                for val in assigned:
-                    print(val, end='')
+                # for val in assigned:
+                #     print(val, end='')
                 # assigned[s[i][j]]+1
 
         value = float(0)
@@ -271,101 +275,6 @@ class SearchAlgorithm:
         # print(solution.schedule)
         return solution
 
-    @staticmethod
-    def sa(problem, deadline):
-        def update_temperature(T, k):
-            return T - 0.001
-
-        def make_move(x, A, T):
-            rand = problem.random.nextInt(len(A))
-            delta = A[rand].value - A[x].value
-
-            if delta < 0:
-                return rand
-            else:
-                prob = math.exp(-delta / T)
-                return rand if problem.random.nextDouble() < prob else x
-
-
-
-
-        P = problem
-        A = problem.courses
-        L = len(A)
-        x0 = P.random.nextInt(L)
-        T = 1.
-        K = 1
-
-        x = x0
-        x_best = x0
-
-        while T > 1e-3:
-            x = make_move(x, A, T)
-            if(A[x].value < A[x_best].value):
-                x_best = x
-            T = update_temperature(T, K)
-
-        print("iterations:", K)
-        return x, x_best, x0
-
-
-    @staticmethod
-    def sa2(problem, deadline):
-        def distance(problem, index):
-            """Calculates distance between two coordinates."""
-            # calculate the distance penalty
-            r = problem.rooms[index]
-            c = problem.courses[index]
-            b1 = r.b
-            b2 = c.preferredLocation
-            xDist = (b1.xCoord - b2.xCoord) * (b1.xCoord - b2.xCoord)
-            yDist = (b1.yCoord - b2.yCoord) * (b1.yCoord - b2.yCoord)
-            dist = math.sqrt(xDist + yDist)
-            return dist
-
-        def energy(state1, state2):
-            """State are indexes."""
-            e = 0
-            e += distance(problem, state1) + distance(problem, state2)
-            return e
-
-        solution = problem.getEmptySchedule()
-
-        # print("Courses {} values inorder:".format(len(problem.courses)))
-        # for course in problem.courses:
-            # print("{},".format(course.value), end='')
-
-        def generate_idx(problem):
-            size = len(problem.courses)
-            i = problem.random.nextInt(size)  # Uses same random seed
-            u = 1   # Noise
-            if i+u > size:
-                return i-1
-            if i-u < 0:
-                return i+1
-            return i
-
-        temp = 4
-        scale = math.sqrt(temp)
-        search_space = (len(problem.courses))
-        start = problem.random.nextInt(search_space)
-        index = start
-        # x = problem.rooms[start]  # index
-        cur = distance(problem, index)
-        history = [problem.rooms[index]]  # History to keep track of visited
-        for i in range(100):
-            prop = index + int(problem.random.nextDouble() * scale)
-            formula = math.log(problem.random.nextDouble())*temp
-            next_dist = distance(problem, (int(prop))) - cur
-            if prop > len(problem.rooms) or prop < 0 or formula > next_dist:
-                prop = index
-            index = prop
-            cur = distance(problem, index)
-            temp = 0.9 * temp
-            history.append(problem.rooms[index])
-
-        print(history)
-
 
 
 def main():
@@ -433,4 +342,4 @@ def main():
     print("Score: " + str(score))
     print()
 
-main()
+# main()

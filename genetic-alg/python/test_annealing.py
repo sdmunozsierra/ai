@@ -24,11 +24,11 @@ class SearchAlgorithm:
                             solution.schedule[k][j] = i
                             scheduled = True
                             break
-        print("solution:\n")
-        for row in solution.schedule:
-            for val in row:
-                print(val, end=' ')
-            print()
+        # print("solution:\n")
+        # for row in solution.schedule:
+        #     for val in row:
+        #         print(val, end=' ')
+        #     print()
         return solution
 
 
