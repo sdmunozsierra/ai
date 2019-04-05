@@ -90,8 +90,9 @@ class SchedulingProblem:
                     tmp.timeSlotValues[j] = int(self.random.nextDouble() * 10)
             self.courses.append(tmp)
 
+        print("Courses timeslotvalues and real value:")
         for course in self.courses:
-            print(course.timeSlotValues)
+            print("{} -> {}".format(course.timeSlotValues, course.value))
 
     def getEmptySchedule(self):
         tmp = Schedule()
@@ -271,6 +272,44 @@ class SearchAlgorithm:
 
     @staticmethod
     def sa(problem, deadline):
+        def update_temperature(T, k):
+            return T - 0.001
+
+        def make_move(x, A, T):
+            rand = problem.random.nextInt(len(A))
+            delta = A[rand].value - A[x].value
+
+            if delta < 0:
+                return rand
+            else:
+                prob = math.exp(-delta / T)
+                return rand if problem.random.nextDouble() < prob else x
+
+
+
+
+        P = problem
+        A = problem.courses
+        L = len(A)
+        x0 = P.random.nextInt(L)
+        T = 1.
+        K = 1
+
+        x = x0
+        x_best = x0
+
+        while T > 1e-3:
+            x = make_move(x, A, T)
+            if(A[x].value < A[x_best].value):
+                x_best = x
+            T = update_temperature(T, K)
+
+        print("iterations:", K)
+        return x, x_best, x0
+
+
+    @staticmethod
+    def sa2(problem, deadline):
         def distance(problem, index):
             """Calculates distance between two coordinates."""
             # calculate the distance penalty
@@ -393,4 +432,4 @@ def main():
     print("Score: " + str(score))
     print()
 
-main()
+# main()
