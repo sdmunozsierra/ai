@@ -31,7 +31,7 @@ class Schedule:
 class SchedulingProblem:
 
     def __init__(self):
-        self.NUM_TIME_SLOTS = 10
+        self.NUM_TIME_SLOTS = 100
         self.MAX_X_COORD = 10
         self.MAX_Y_COORD = 10
         self.DISTANCE_PENALTY = float(2.5)
@@ -96,6 +96,7 @@ class SchedulingProblem:
 
     def getEmptySchedule(self):
         tmp = Schedule()
+        print(self)
         print("Schedule size: {}, {}".format(len(self.rooms), self.NUM_TIME_SLOTS))
         tmp.Schedule(len(self.rooms), self.NUM_TIME_SLOTS)
 
@@ -432,4 +433,4 @@ def main():
     print("Score: " + str(score))
     print()
 
-# main()
+main()
