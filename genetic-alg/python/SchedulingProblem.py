@@ -84,7 +84,7 @@ class SchedulingProblem:
         # print(len(tmp.schedule))
         for i in range(len(self.rooms)):
             for j in range(self.NUM_TIME_SLOTS):
-                print("i {} j {}".format(i, j))
+                # print("i {} j {}".format(i, j))
                 tmp.schedule[i][j] = -1
         return tmp
 

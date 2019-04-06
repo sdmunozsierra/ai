@@ -1,7 +1,7 @@
 import sys
 import time
 from SchedulingProblem import SchedulingProblem
-from SearchAlgorithm import SearchAlgorithm
+from SearchAlgorithm import SearchAlgorithm, SimulatedAnnealing
 
 def main():
     nBuildings = 0
@@ -50,7 +50,13 @@ def main():
     elif (algorithm == 1):
         solution = search.greedy(test1, deadline)
     elif (algorithm == 2):
-        solution = search.simulated_annealing(test1, deadline)
+        # Create a SimulatedAnnealing algorithm
+        pre_solution = SimulatedAnnealing(test1, deadline)
+        pre_solution.set_heuristic("Value")  # Add heuristic
+        pre_solution.set_limit(1000)  # Add value
+        pre_solution = pre_solution.start_simulated_annealing()
+
+        solution = search.naiveBaseline(pre_solution, deadline)
         print("DONE!")
 
     else:
