@@ -56,8 +56,12 @@ def main():
         pre_solution.set_limit(1000)  # Add value
         pre_solution = pre_solution.start_simulated_annealing()
 
+        dis_pre_solution = SimulatedAnnealing(test1, deadline)
+        pre_solution.set_heuristic("Distance")  # Add heuristic
+        pre_solution.set_limit(1000)  # Add value
+        pre_solution = pre_solution.start_simulated_annealing()
+
         solution = search.naiveBaseline(pre_solution, deadline)
-        print("DONE!")
 
     else:
         print("ERROR: Given algorithm number does not exist!")

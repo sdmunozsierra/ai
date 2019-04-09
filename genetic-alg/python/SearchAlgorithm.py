@@ -137,6 +137,8 @@ class SimulatedAnnealing():
     def _get_problem_length(self):
         if self.heuristic == "value":
             return len(self.problem.courses)
+        if self.heuristic == "distance":
+            return len(self.problem.rooms)
         print("Could not get problem length from unknown heuristic.")
         exit(1)
 
@@ -308,6 +310,55 @@ class SimulatedAnnealing():
         print("Heuristic not recognized values were compared.")
         exit(1)
 
+
+    def _get_neighbor_distance_list(self):
+        """Get the distance list from all neighbors.
+        :returns: Best neighbor distance neighbor.
+        """
+        if not self.heuristic:
+            print("Could not get distance list from unknown heuristic.")
+            exit(1)
+        print("Getting distance list indices:")
+        if self.heuristic == "distance":
+            distance_list = []
+            max_dist = float('-inf')
+            min_dist = float('+inf')
+            for i in range(len(self.problem.courses)):
+                distance = self._calculate_distance(i)
+                if distance > max_dist:
+                    max_dist = distance
+                if distance < min_dist:
+                    min_dist = distance
+            # dist = all(
+            #     distance < self._calculate_distance(ix) for ix in self._get_neighbors(i))
+            print("max_dist:", max_dist)
+            print("min_dist:", min_dist)
+            # return dist
+        print("Heuristic not recognized local maxima list not computed.")
+        exit(1)
+
+    def _calculate_distance(self, x):
+        """Calculate the distance between the room and preferred location.
+        :param x: Current state x index.
+        :returns: distance.
+        """
+        if not self.heuristic:
+            print("Could not get distance from unknown heuristic.")
+            exit(1)
+        print("Getting distance:")
+        if self.heuristic == "distance":
+            r = self.problem.rooms[x]
+            c = self.problem.courses[x]
+            b1 = r.b
+            b2 = c.preferredLocation
+            xDist = (b1.xCoord - b2.xCoord) * (b1.xCoord - b2.xCoord)
+            yDist = (b1.yCoord - b2.yCoord) * (b1.yCoord - b2.yCoord)
+            dist = math.sqrt(xDist + yDist)
+            print("distance: ", dist)
+            return dist
+        print("Heuristic not recognized distance not computed.")
+        exit(1)
+
     def start_simulated_annealing(self):
         """Simulated Annealing implementation.
         :param problem: SchedulingProblem.
@@ -317,13 +368,18 @@ class SimulatedAnnealing():
         start_x = self.problem.random.nextInt(self.prob_l)  # Start randomly
         temperature = self._set_start_temperature()
         k = 1  # Each iteration cost is 1  # Change if needed
-
         x = start_x  # Current x state index
         global_maximum = x  # Global maximum found
 
-        # Reorder with local maxima
+        # Distance check
+        self._get_neighbor_distance_list()
+
+
+
+        # Reorder courses with local maxima
         local_maxima = self._get_local_maxima()
         self.problem = self.reorder_as_local_maxima(local_maxima)
+
         # Loop until temperature almost 0
         while temperature > 1e-3:
             x = self.make_move(x, temperature)
