@@ -50,17 +50,30 @@ def main():
     elif (algorithm == 1):
         solution = search.greedy(test1, deadline)
     elif (algorithm == 2):
-        # Create a SimulatedAnnealing algorithm
+        # Create a SimulatedAnnealing algorithm for value
         pre_solution = SimulatedAnnealing(test1, deadline)
         pre_solution.set_heuristic("Value")  # Add heuristic
-        pre_solution.set_limit(1000)  # Add value
+        pre_solution.set_limit(10000)  # Add value
         pre_solution = pre_solution.start_simulated_annealing()
-
+        solution = search.naiveBaseline(pre_solution, deadline)
+    elif (algorithm == 3):
+        # Create a SimulatedAnnealing algorithm for distance
         dis_pre_solution = SimulatedAnnealing(test1, deadline)
-        pre_solution.set_heuristic("Distance")  # Add heuristic
-        pre_solution.set_limit(1000)  # Add value
-        pre_solution = pre_solution.start_simulated_annealing()
+        dis_pre_solution.set_heuristic("Distance")  # Add heuristic
+        dis_pre_solution.set_limit(10000)  # Add value
+        dis_pre_solution = dis_pre_solution.start_simulated_annealing()
+        solution = search.naiveBaseline(dis_pre_solution, deadline)
+    elif (algorithm == 4):
+        # Create a SimulatedAnnealing algorithm for value and distance
+        dis_pre_solution = SimulatedAnnealing(test1, deadline)
+        dis_pre_solution.set_heuristic("Distance")  # Add heuristic
+        dis_pre_solution.set_limit(10000)  # Add value
+        dis_pre_solution = dis_pre_solution.start_simulated_annealing()
 
+        pre_solution = SimulatedAnnealing(dis_pre_solution, deadline)
+        pre_solution.set_heuristic("Value")  # Add heuristic
+        pre_solution.set_limit(10000)  # Add value
+        pre_solution = pre_solution.start_simulated_annealing()
         solution = search.naiveBaseline(pre_solution, deadline)
 
     else:

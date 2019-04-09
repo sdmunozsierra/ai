@@ -157,6 +157,9 @@ class SimulatedAnnealing():
         if i == self.prob_l - 1:
             print("Neighbor: ", [self.prob_l - 2])
             return [self.prob_l - 2]
+        # if i != self.prob_l - 2 and i != 1:
+        #     print("4 neighbors: ", [i-2, i - 1, i + 1, i + 2])
+        #     return [i-2, i - 1, i + 1, i + 1]
         print("Neighbor: ", [i - 1, i + 1])
         return [i - 1, i + 1]
 
@@ -173,20 +176,28 @@ class SimulatedAnnealing():
             domain = self.problem.courses
             delta = domain[random_index].value - domain[x].value
             return delta
+        if self.heuristic == "distance":
+            random_index_distance = self._calculate_distance(random_index)
+            index_x_distance = self._calculate_distance(x)
+            delta = random_index_distance - index_x_distance
+            return delta
         print("Heuristic not recognized no delta was found.")
         exit(1)
 
     def _set_start_temperature(self):
-        """Sets a starting temperature. This can be optimized."""
+        """Sets a starting temperature."""
         if not self.heuristic:
             print("Could set temperature value from unknown heuristic.")
             exit(1)
         if self.heuristic == "value":
             temperature = self.prob_l * 10.7  # High enough
             return temperature
+        # TODO modify according to distance parameters
+        if self.heuristic == "distance":
+            temperature = self.prob_l * 17.7  # High enough
+            return temperature
         print("Heuristic not recognized no temperature was set.")
         exit(1)
-
 
     def update_temperature(self, temperature, k=None):
         """Updates temperature using k.
@@ -220,8 +231,9 @@ class SimulatedAnnealing():
         return x  # Return same state
 
     def _get_neighbor_local_maxima(self, i):
-        """Get local maxima touple list.
+        """Get local maxima tuple list.
         :param i: index to find the local maxima.
+        :returns: tuple list with local maxima.
         """
         if not self.heuristic:
             print("Could not get local maxima from unknown heuristic.")
@@ -232,6 +244,7 @@ class SimulatedAnnealing():
             return all(
                 domain[i].value > domain[ix].value for ix in self._get_neighbors(i))
         print("Heuristic not recognized local maxima not computed.")
+        # Continue instead of exiting?
         exit(1)
 
     def _get_local_maxima(self):
@@ -251,7 +264,6 @@ class SimulatedAnnealing():
         print("Heuristic not recognized local maxima list not computed.")
         exit(1)
 
-
     def reorder_as_local_maxima(self, local_maxima):
         """Reorders the problem's courses indices towards local_maxima.
         moves maximum values to the front of the list.
@@ -269,6 +281,12 @@ class SimulatedAnnealing():
             for idx, course in local_maxima:
                 domain.pop(idx)
                 domain.insert(0, course)
+            return self.problem
+        if self.heuristic == "distance":
+            domain = self.problem.courses
+            for idx, course in local_maxima:
+                domain.pop(idx)
+                domain.append(course)
             return self.problem
         print("Heuristic not recognized local maxima indices not rearranged.")
         exit(1)
@@ -289,6 +307,13 @@ class SimulatedAnnealing():
             domain.pop(global_maximum)
             domain.insert(0, course_max)
             return self.problem
+        if self.heuristic == "distance":
+            print("Global minima index:", global_maximum)
+            domain = self.problem.courses
+            course_max = domain[global_maximum]
+            domain.pop(global_maximum)
+            domain.append(course_max)
+            return self.problem
         print("Heuristic not recognized gobal maxima not rearranged.")
         exit(1)
 
@@ -307,34 +332,31 @@ class SimulatedAnnealing():
             if domain[x].value > domain[global_maximum].value:
                 return True  # Update global maximum
             return False
-        print("Heuristic not recognized values were compared.")
+        if self.heuristic == "distance":
+            # It is the global minimum for distance
+            if (self._calculate_distance(x) < self._calculate_distance(
+                    global_maximum)):
+                return True  # Update global maximum
+            return False
+        print("Heuristic not recognized values were not compared.")
         exit(1)
 
-
-    def _get_neighbor_distance_list(self):
-        """Get the distance list from all neighbors.
-        :returns: Best neighbor distance neighbor.
+    def _get_neighbor_distance_local_maxima(self, i):
+        """Get the distance local maxima tuple list.
+        :param i: index to find the distance local maxima.
+        :returns: tuple list with distance local maxima.
         """
         if not self.heuristic:
             print("Could not get distance list from unknown heuristic.")
             exit(1)
-        print("Getting distance list indices:")
+        print("Getting distance local maxima indices:")
         if self.heuristic == "distance":
-            distance_list = []
-            max_dist = float('-inf')
-            min_dist = float('+inf')
-            for i in range(len(self.problem.courses)):
-                distance = self._calculate_distance(i)
-                if distance > max_dist:
-                    max_dist = distance
-                if distance < min_dist:
-                    min_dist = distance
-            # dist = all(
-            #     distance < self._calculate_distance(ix) for ix in self._get_neighbors(i))
-            print("max_dist:", max_dist)
-            print("min_dist:", min_dist)
-            # return dist
-        print("Heuristic not recognized local maxima list not computed.")
+            dist = all(
+                self._calculate_distance(i) < self._calculate_distance(ix) for ix in self._get_neighbors(i))
+            print("Getting distance for all...")
+            print(dist)
+            return dist
+        print("Heuristic not recognized distance local maxima not computed.")
         exit(1)
 
     def _calculate_distance(self, x):
@@ -371,14 +393,22 @@ class SimulatedAnnealing():
         x = start_x  # Current x state index
         global_maximum = x  # Global maximum found
 
-        # Distance check
-        self._get_neighbor_distance_list()
+        # Check weather to use distance or value methods.
+        if self.heuristic == 'value':
+            # Reorder courses with local maxima
+            local_maxima = self._get_local_maxima()
+            self.problem = self.reorder_as_local_maxima(local_maxima)
+        if self.heuristic == 'distance':
+            # TODO Rename to local minima (as least distance is better)
+            local_maxima = []
+            for i in range(self.prob_l):
+                if self._get_neighbor_distance_local_maxima(i):
+                    local_maxima.append([i, self.problem.courses[i]])
+            print("local maxima distance found: ", local_maxima)
+            self.reorder_as_local_maxima(local_maxima)
 
-
-
-        # Reorder courses with local maxima
-        local_maxima = self._get_local_maxima()
-        self.problem = self.reorder_as_local_maxima(local_maxima)
+        # # Distance check
+        # self._get_neighbor_distance_list()
 
         # Loop until temperature almost 0
         while temperature > 1e-3:
@@ -399,6 +429,7 @@ class SimulatedAnnealing():
             print("Could not get stats from unfinished algorithms.")
             exit(1)
         if self.heuristic == "value":
+            print("Displaying best solutions for Course values.")
             domain = self.problem.courses
             print("Start solution index: {} = {:3f}".format(
                 start_x, domain[start_x].value))
@@ -406,6 +437,16 @@ class SimulatedAnnealing():
                 x, domain[x].value))
             print("Best solution (global_maxima) index: {} = {:0.3f}".format(
                 global_maximum, domain[global_maximum].value))
+        elif self.heuristic == "distance":
+            # TODO change maxima to minima
+            print("Displaying best solutions for Course distances.")
+            print("Start solution index: {} = {:3f}".format(
+                start_x, self._calculate_distance(start_x)))
+            print("Current solution index: {} = {:1.3f}".format(
+                x, self._calculate_distance(x)))
+            print("Best solution (global_maxima) index: {} = {:0.3f}".format(
+                global_maximum,
+                self._calculate_distance(global_maximum)))
         else:
             print("Heuristic not recognized stats were not computed.")
             exit(1)
