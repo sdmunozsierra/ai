@@ -70,8 +70,9 @@ class SchedulingProblem:
             self.courses.append(tmp)
 
         print("Courses timeslotvalues and real value:")
-        for course in self.courses:
-            print("{} -> {}".format(course.timeSlotValues, course.value))
+        for idx, course in enumerate(self.courses):
+            print("idx {}: {} -> {}".format(
+                idx, course.timeSlotValues, course.value))
 
     def getEmptySchedule(self):
         tmp = Schedule()

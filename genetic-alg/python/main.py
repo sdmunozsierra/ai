@@ -1,7 +1,7 @@
 import sys
 import time
 from SchedulingProblem import SchedulingProblem
-from SearchAlgorithm import SearchAlgorithm, SimulatedAnnealing
+from SearchAlgorithm import SearchAlgorithm, SimulatedAnnealing, SimulatedAnnealingTwoHeuristics
 
 def main():
     nBuildings = 0
@@ -53,29 +53,34 @@ def main():
         # Create a SimulatedAnnealing algorithm for value
         pre_solution = SimulatedAnnealing(test1, deadline)
         pre_solution.set_heuristic("Value")  # Add heuristic
-        pre_solution.set_limit(10000)  # Add value
+        pre_solution.set_limit(100)  # Add value
         pre_solution = pre_solution.start_simulated_annealing()
         solution = search.naiveBaseline(pre_solution, deadline)
     elif (algorithm == 3):
         # Create a SimulatedAnnealing algorithm for distance
         dis_pre_solution = SimulatedAnnealing(test1, deadline)
         dis_pre_solution.set_heuristic("Distance")  # Add heuristic
-        dis_pre_solution.set_limit(10000)  # Add value
+        dis_pre_solution.set_limit(100)  # Add value
         dis_pre_solution = dis_pre_solution.start_simulated_annealing()
         solution = search.naiveBaseline(dis_pre_solution, deadline)
     elif (algorithm == 4):
         # Create a SimulatedAnnealing algorithm for value and distance
-        dis_pre_solution = SimulatedAnnealing(test1, deadline)
+        pre_solution = SimulatedAnnealing(test1, deadline)
+        pre_solution.set_heuristic("Value")  # Add heuristic
+        pre_solution.set_limit(100)  # Add value
+        pre_solution = pre_solution.start_simulated_annealing()
+
+        dis_pre_solution = SimulatedAnnealing(pre_solution, deadline)
         dis_pre_solution.set_heuristic("Distance")  # Add heuristic
-        dis_pre_solution.set_limit(10000)  # Add value
+        dis_pre_solution.set_limit(100)  # Add value
         dis_pre_solution = dis_pre_solution.start_simulated_annealing()
 
-        pre_solution = SimulatedAnnealing(dis_pre_solution, deadline)
-        pre_solution.set_heuristic("Value")  # Add heuristic
-        pre_solution.set_limit(10000)  # Add value
-        pre_solution = pre_solution.start_simulated_annealing()
-        solution = search.naiveBaseline(pre_solution, deadline)
+        solution = search.naiveBaseline(dis_pre_solution, deadline)
 
+    elif (algorithm == 5):
+        pre_solution = SimulatedAnnealingTwoHeuristics(test1, deadline)
+        pre_solution.set_limit(100)
+        pre_solution = pre_solution.start_simulated_annealing()
     else:
         print("ERROR: Given algorithm number does not exist!")
         exit(1)
