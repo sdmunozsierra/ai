@@ -35,8 +35,7 @@ public class GameMaster {
 		players.add(new SolidRock());
 		players.add(new MaxMinPayoff());
 		players.add(new MinMaxRegret());
-		players.add(new NashEquilibrium());
-		//add your agent(s) here
+		players.add(new PureNashEquilibrium());
 
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
