@@ -568,7 +568,6 @@ class SimulatedAnnealingTwoHeuristics(SimulatedAnnealing):
         print("All courses x in range y rooms")
         self._calculate_distance_with_range(0, range_y)
 
-        #
         # for i in range(range_x - 99):
         #     # if self._get_neighbor_value_local_maxima(i, "value", range_x):
         #     #     local_maxima_val.append([i, self.problem.courses[i]])
