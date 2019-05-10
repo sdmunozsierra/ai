@@ -10,13 +10,13 @@ import games.*;
 
 /**
  * Normal Form Round-Robin Tournament Simulator (NFRRTS for short, we'll keep working on the name)
- * 
+ *
  * @author Marcus Gutierrez and Oscar Veliz
  * @version 2019.04.15
  */
 public class GameMaster {
 
-	private static boolean verbose = false; //Set to false if you do not want the details
+	private static boolean verbose = true; //Set to false if you do not want the details
 	private static int maxPayoff = 10; //100 is usually pretty good
 	private static int numGames = 10; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
@@ -24,19 +24,33 @@ public class GameMaster {
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
 	private static final int timeLimit = 1000; //1000 milliseconds
-	
+
 	/**
 	 * Runs the tournament. Add your agent(s) to the list.
 	 * @param args not using any command line arguments
 	 */
 	public static void main(String[] args) {
 		ArrayList<Player> players = new ArrayList<Player>();
-		//players.add(new UniformRandom());
+		players.add(new UniformRandom());
 		players.add(new SolidRock());
-		players.add(new ManualOverride());
+		// players.add(new ManualOverride());
 		//add your agent(s) here
-		
+		players.add(new MaxMinPayoff());
+		// players.add(new MinMaxRegret());
+		// players.add(new NashEquilibrium());
+		players.add(new TotallyMixedStrategy());
+
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
+		settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
+		settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,5,GameType.RISK));
+
+		//NEW
+		// ArrayList<Parameters> settings = new ArrayList<Parameters>();
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
@@ -44,7 +58,8 @@ public class GameMaster {
 		//settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,4,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
+		// settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
+		//END NEW
 		for(int setting = 0; setting < settings.size(); setting++){
 			param = settings.get(setting);
 			System.out.println(param.getDescription());
@@ -52,7 +67,7 @@ public class GameMaster {
 			if(games.isEmpty()){//safety net
 				System.out.println("Could Not Create Games");
 				System.exit(0);
-			}			
+			}
 			//update agents with parameters
 			for(int c = 0; c < players.size(); c++){
 				players.get(c).setParameters(param.copy());
@@ -67,7 +82,7 @@ public class GameMaster {
 				gamesCopy.add(new MatrixGame(itr.next()));
 			}
 			GameGenerator.obfuscate(games,param);
-			
+
 			//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];
 			double[] wins = new double[players.size()];
@@ -136,9 +151,9 @@ public class GameMaster {
 			//average the payoff matrix
 			for(int i = 0; i < payoffMatrix.length; i++)
 				for(int j= 0; j < payoffMatrix[i].length; j++)
-					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));	
+					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));
 			if(verbose) printMatrix(payoffMatrix,players);
-			
+
 			//compute results
 			double[] expPayoff = calculateAverageExpectedPayoffs(payoffMatrix);
 			//double[] regrets = calculateRegrets(payoffMatrix);
@@ -172,7 +187,7 @@ public class GameMaster {
 		strats[1] = pd2.getSolution();
 		p1.addHistory(strats);
 		p2.addHistory(strats);
-		payoffs = match(strats[0],strats[1],game);		
+		payoffs = match(strats[0],strats[1],game);
 		p1.saveLastPayoffs(payoffs);
 		p2.saveLastPayoffs(payoffs);
 		return payoffs;
@@ -181,7 +196,7 @@ public class GameMaster {
 	/**
 	 * Tries to execute a Player class' method by using threads for protection in case
 	 * the Player subclasses crash or time out.
-	 * 
+	 *
 	 * @param pDriver The thread that will execute the player
 	 */
 	private static void tryPlayer(PlayerDriver pDriver){
@@ -220,10 +235,10 @@ public class GameMaster {
 					player.setPlayerNumber(playerNumber);
 					tryPlayer(new PlayerDriver(PlayerState.SOLVE,player));
 				}
-			}				
+			}
 		}
 	}
-	
+
 	/**
 	 * Reads all the games used in the tournament
 	 * ***DEPRICATED***
@@ -240,10 +255,10 @@ public class GameMaster {
 			}catch(Exception e){System.out.println("Could not read "+type+i+".game");}
 		}
 	}
-	
+
 	/**
 	 * A single individual match between to players, the first player is row the second is column
-	 * 
+	 *
 	 * If a strategy for a player is invalid it will assign a payoff of -1337 to that player
 	 * @param p1 row player
 	 * @param p2 column player
@@ -279,10 +294,10 @@ public class GameMaster {
 		}*/
 		return SolverUtils.expectedPayoffs(p1.getStrategy(gameNumber,1),p2.getStrategy(gameNumber,2),games.get(gameNumber));
 	}
-	
+
 	/**
 	 * A single individual match between to players, the first player is row the second is column
-	 * 
+	 *
 	 * If a strategy for a player is invalid it will assign a payoff of -1337 to that player
 	 * @param p1 row player
 	 * @param p2 column player
@@ -293,7 +308,7 @@ public class GameMaster {
 	public static double[] match(Player p1, Player p2, int gameNumber, MatrixGame game){
 		return SolverUtils.expectedPayoffs(p1.getStrategy(gameNumber,1),p2.getStrategy(gameNumber,2),game);
 	}
-	
+
 	/**
 	 * Run match using strategies instead of players
 	 * @param s1 player 1 strategy
@@ -304,7 +319,7 @@ public class GameMaster {
 	public static double[] match(MixedStrategy s1, MixedStrategy s2, MatrixGame mg){
 		return SolverUtils.expectedPayoffs(s1,s2,mg);
 	}
-	
+
 	/**
 	 * Computes and stores the results of a match given the expected payoffs
 	 * @param matrix Payoff Matrix
@@ -325,7 +340,7 @@ public class GameMaster {
 		else
 			wins[p2]++;
 	}
-	
+
 	/**
 	 * Want to visualize the results of a tournament? Call this function.
 	 * @param matrix Payoff Matrix
@@ -373,7 +388,7 @@ public class GameMaster {
 		}
 		return regret;
 	}
-	
+
 	/**
 	 * Calculates the average payoffs scored against each agent (the reverse payoff)
 	 * @param matrix array of tournament payoffs
@@ -389,7 +404,7 @@ public class GameMaster {
 		}
 		return reverse;
 	}
-	
+
 	/**
 	 * Calculates the stabilities for every agents and stores them in the array.
 	 * (Taken from  GameUtils class in ega.games package.)
@@ -413,7 +428,7 @@ public class GameMaster {
 
 	/**
 	 * Returns the maximum number in the given array of doubles.
-	 * 
+	 *
 	 * @param a the array of doubles.
 	 * @return the maximum number in the array.
 	 */
@@ -424,7 +439,7 @@ public class GameMaster {
 				max = a[i];
 		return max;
 	}
-	
+
 	/**
 	 * Player Array printer
 	 * @param text general text usually a heading
