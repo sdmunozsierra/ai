@@ -76,46 +76,44 @@ public class TotallyMixedStrategy extends Player {
     regretTable = getRegretTable(mg, outcome, playerNumber);
 
     if(playerNumber == 0){
+      //get maximum of each row of the regret table
       double[] max = new double[act];
-      max = get_max_row(regretTable, act, playerNumber);
+      max = get_max_row(regretTable, act);
       chosenPosition = get_min_max_position(chosenPosition, max, act);
     }//endif
 
     else if(playerNumber == 1){ //column player
-
-      //get maximum of each row of the regret table
-      double [] max = new double[act];
-      for(int col = 0; col < act; col++){
-        double rowMax = regretTable[0][col];
-        for(int row = 0; row < act; row++){
-          if(regretTable[row][col] > rowMax){
-            rowMax = regretTable[row][col];
-          }
-        }
-        max[col] = rowMax;
-      }
+      //get maximum of each column of the regret table
+      double[] max = new double[act];
+      max = get_max_col(regretTable, act);
       chosenPosition = get_min_max_position(chosenPosition, max, act);
     }//end else
 
     return chosenPosition;
-
   }
 
-  private double[] get_max_row(double[][] regretTable, int act, int playerNumber){
+  private double[] get_max_row(double[][] regretTable, int act){
     double[] max = new double[act];
-
     for(int row = 0; row < act; row++){
-      double rowMax = 0;
-      if (playerNumber == 1) rowMax = regretTable[row][0];
-      else rowMax = regretTable[0][row];
+      double rowMax = regretTable[row][0];
       for(int col = 0; col < act; col++){
-        if (playerNumber == 1){
-          if(regretTable[row][col] > rowMax) rowMax = regretTable[row][col];
-        }else{
-          if(regretTable[col][row] > rowMax) rowMax = regretTable[row][col];
-        }
+        if(regretTable[row][col] > rowMax)
+          rowMax = regretTable[row][col];
       }
       max[row] = rowMax;
+    }
+    return max;
+  }
+
+  private double[] get_max_col(double[][] regretTable, int act){
+    double[] max = new double[act];
+    for(int col = 0; col < act; col++){
+      double rowMax = regretTable[0][col];
+      for(int row = 0; row < act; row++){
+        if(regretTable[row][col] > rowMax)
+          rowMax = regretTable[row][col];
+      }
+      max[col] = rowMax;
     }
     return max;
   }
@@ -159,18 +157,10 @@ public class TotallyMixedStrategy extends Player {
     }else{
       //calculate regret table
       for(int row = 1; row <= act; row++){
-        // if(playerNumber == 0){
-        //   outcome[0] = 1;
-        //   outcome[1] = row;
-        // }
         outcome[0] = row;
         outcome[1] = 1;
         double highest = mg.getPayoff(outcome, playerNumber);
         for(int col = 1; col <= act; col++){ //find highest number of the column
-          // if(playerNumber == 0){
-          //   outcome[0] = col;
-          //   outcome[1] = row;
-          // }
           outcome[0] = row;
           outcome[1] = col;
           if(mg.getPayoff(outcome, playerNumber) > highest){
@@ -184,7 +174,6 @@ public class TotallyMixedStrategy extends Player {
       }
       return regretTable;
     }
-
   }//end method
 
   /**

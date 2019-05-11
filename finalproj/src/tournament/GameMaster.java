@@ -31,7 +31,7 @@ public class GameMaster {
 	 */
 	public static void main(String[] args) {
 		ArrayList<Player> players = new ArrayList<Player>();
-		// players.add(new UniformRandom());
+		players.add(new UniformRandom());
 		players.add(new SolidRock());
 		// players.add(new ManualOverride());
 		//add your agent(s) here
@@ -65,7 +65,7 @@ public class GameMaster {
 			param = settings.get(setting);
 			System.out.println(param.getDescription());
 			// games = GameGenerator.generate(numGames,param);
-			games = GameGenerator.classZ(numGames, param);
+			games = GameGenerator.classA(numGames, param);
 			if(games.isEmpty()){//safety net
 				System.out.println("Could Not Create Games");
 				System.exit(0);
