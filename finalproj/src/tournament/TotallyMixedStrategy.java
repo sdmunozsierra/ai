@@ -186,6 +186,7 @@ public class TotallyMixedStrategy extends Player {
       MixedStrategy ms = new MixedStrategy(mg.getNumActions(playerNumber));
       int max_min_result = max_min(mg, playerNumber);
       int min_max_result = min_max(mg, playerNumber);
+      int nash_result;
 
       double[] probability_array = new double[2]; // Currently supports 2 algorithms
 
