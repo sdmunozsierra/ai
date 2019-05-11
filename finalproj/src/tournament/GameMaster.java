@@ -16,7 +16,7 @@ import games.*;
  */
 public class GameMaster {
 
-	private static boolean verbose = true; //Set to false if you do not want the details
+	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 10; //100 is usually pretty good
 	private static int numGames = 10; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
@@ -35,17 +35,18 @@ public class GameMaster {
 		players.add(new SolidRock());
 		// players.add(new ManualOverride());
 		//add your agent(s) here
-		// players.add(new MaxMinPayoff());
-		// players.add(new MinMaxRegret());
+		players.add(new MaxMinPayoff());
+		players.add(new MinMaxRegret());
 		// players.add(new NashEquilibrium());
+		players.add(new PureNashEquilibrium());
 		players.add(new TotallyMixedStrategy());
 
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
-		// settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
-		// settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
-		// settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
+		settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
+		settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
 		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,5,GameType.RISK));
 
