@@ -198,9 +198,9 @@ public class TotallyMixedStrategy extends Player {
       // Check if is convinient to use other than maxmin for large number of actions
       if (mg.getNumActions(playerNumber) >= 5){
         if(i == max_min_result)
-        ms.setProb(i, 1.0);
+          ms.setProb(i, 1.0);
         else
-        ms.setProb(i, 0);
+          ms.setProb(i, 0);
       }
       // Calculate the probability to chose a strategy
       else{
@@ -212,11 +212,11 @@ public class TotallyMixedStrategy extends Player {
           break;
         }
         if (i == max_min_result)
-        probability_array[i-1] += .35;
+          probability_array[i-1] += .35;
         if (i == pure_nash_result)
-        probability_array[i-1] += .25;
+          probability_array[i-1] += .25;
         if (i == min_max_result)
-        probability_array[i-1] += .40;
+          probability_array[i-1] += .40;
 
         // System.out.println("probability: "+ probability_array[i-1] + " for " + i);
         //Update probability for that choice
