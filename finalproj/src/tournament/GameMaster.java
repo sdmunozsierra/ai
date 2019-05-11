@@ -44,10 +44,10 @@ public class GameMaster {
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
-		settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
+		// settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
+		// settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
 		settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,5,GameType.RISK));
 
 		//NEW
@@ -64,7 +64,8 @@ public class GameMaster {
 		for(int setting = 0; setting < settings.size(); setting++){
 			param = settings.get(setting);
 			System.out.println(param.getDescription());
-			games = GameGenerator.generate(numGames,param);
+			// games = GameGenerator.generate(numGames,param);
+			games = GameGenerator.classZ(numGames, param);
 			if(games.isEmpty()){//safety net
 				System.out.println("Could Not Create Games");
 				System.exit(0);

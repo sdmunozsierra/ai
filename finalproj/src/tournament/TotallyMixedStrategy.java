@@ -76,17 +76,8 @@ public class TotallyMixedStrategy extends Player {
     regretTable = getRegretTable(mg, outcome, playerNumber);
 
     if(playerNumber == 0){
-      //get maximum of each row of the regret table
-      double [] max = new double[act];
-      for(int row = 0; row < act; row++){
-        double rowMax = regretTable[row][0];
-        for(int col = 0; col < act; col++){
-          if(regretTable[row][col] > rowMax){
-            rowMax = regretTable[row][col];
-          }
-        }
-        max[row] = rowMax;
-      }
+      double[] max = new double[act];
+      max = get_max_row(regretTable, act, playerNumber);
       chosenPosition = get_min_max_position(chosenPosition, max, act);
     }//endif
 
@@ -108,6 +99,25 @@ public class TotallyMixedStrategy extends Player {
 
     return chosenPosition;
 
+  }
+
+  private double[] get_max_row(double[][] regretTable, int act, int playerNumber){
+    double[] max = new double[act];
+
+    for(int row = 0; row < act; row++){
+      double rowMax = 0;
+      if (playerNumber == 1) rowMax = regretTable[row][0];
+      else rowMax = regretTable[0][row];
+      for(int col = 0; col < act; col++){
+        if (playerNumber == 1){
+          if(regretTable[row][col] > rowMax) rowMax = regretTable[row][col];
+        }else{
+          if(regretTable[col][row] > rowMax) rowMax = regretTable[row][col];
+        }
+      }
+      max[row] = rowMax;
+    }
+    return max;
   }
 
   private int get_min_max_position(int chosenPosition, double[] max, int act){
@@ -195,42 +205,39 @@ public class TotallyMixedStrategy extends Player {
       probability_array[i] = 0.0;
     }
 
-    // Check what max min result was
-    // for(int i = 1; i <= mg.getNumActions(playerNumber); i++){
-    //   // System.out.println("Chosen Action == " + max_min_result + " i == " + i);
-    //   if(i != max_min_result) ms.setProb(i, 0);
-    //   else  ms.setProb(i, 1.0);
-    // }
-
-    // System.out.println("MAXMIN Action == " + max_min_result);
-    // System.out.println("MINMAX Action == " + min_max_result);
-    // System.out.println("PURENASH Action == " + pure_nash_result);
-
     for(int i = 1; i <= mg.getNumActions(playerNumber); i++){
-      if (i == max_min_result)
-        probability_array[i-1] += .15;
-      if (i == pure_nash_result)
+      // Check if is convinient to use other than maxmin for large number of actions
+      if (mg.getNumActions(playerNumber) >= 5){
+        if(i == max_min_result)
+        ms.setProb(i, 1.0);
+        else
+        ms.setProb(i, 0);
+      }
+      // Calculate the probability to chose a strategy
+      else{
+        if ((i == max_min_result || i == min_max_result) && i == pure_nash_result){
+          // Set to 100% as max_min or min_max and pure_nash chose the same
+          // System.out.println("probability: 100% for " + i);
+          ms.setZeros();
+          ms.setProb(i, 1.0);
+          break;
+        }
+        if (i == max_min_result)
         probability_array[i-1] += .35;
-      if (i == min_max_result)
-        probability_array[i-1] += .50;
+        if (i == pure_nash_result)
+        probability_array[i-1] += .25;
+        if (i == min_max_result)
+        probability_array[i-1] += .40;
 
-      System.out.println("probability: "+ probability_array[i-1] + " for " + i);
-      //Update probability for that choice
-      ms.setProb(i, probability_array[i-1]);
+        // System.out.println("probability: "+ probability_array[i-1] + " for " + i);
+        //Update probability for that choice
+        ms.setProb(i, probability_array[i-1]);
+      }
     }
-    ms.mixWithUniform(0.05);
 
-    System.out.println(ms.toString());
+    // Enable to see probability statistics of the game
+    // System.out.println(ms.toString());
 
-    // Check min max result
-    // System.out.println("Chosen Action == " + min_max_result);
-    // ms.setZeros();
-    // ms.setProb(min_max_result, 1.0);
-
-    // Check pure nash result
-    // // System.out.println("Chosen Action == " + pure_nash_result);
-    // ms.setZeros();
-    // ms.setProb(pure_nash_result, 1.0);
     return ms;
   }//End solveGame
 
