@@ -31,11 +31,11 @@ public class GameMaster {
 	 */
 	public static void main(String[] args) {
 		ArrayList<Player> players = new ArrayList<Player>();
-		players.add(new UniformRandom());
+		// players.add(new UniformRandom());
 		players.add(new SolidRock());
 		// players.add(new ManualOverride());
 		//add your agent(s) here
-		players.add(new MaxMinPayoff());
+		// players.add(new MaxMinPayoff());
 		// players.add(new MinMaxRegret());
 		// players.add(new NashEquilibrium());
 		players.add(new TotallyMixedStrategy());
@@ -43,9 +43,9 @@ public class GameMaster {
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
-		settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
-		settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
+		// settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
+		// settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
+		// settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
 		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,5,GameType.RISK));
 
